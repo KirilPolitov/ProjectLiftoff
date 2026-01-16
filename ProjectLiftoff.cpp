@@ -138,8 +138,14 @@ int main() {
         float atmosphereDistance = circle.getRadius() * 1.5f;
         if (distance < atmosphereDistance) {
 			float pressure = 1.f * std::exp(-(distance - minDistance) / ((atmosphereDistance - minDistance)/3));
+			float stress = pressure * velocity.length() / 2.f;
+            if (stress > 100.f) {
+				rectangle.setFillColor(sf::Color::Red);
+            }
+			else rectangle.setFillColor(sf::Color::White);
 			velocity -= velocity * pressure * deltaTime;
 		}
+		else rectangle.setFillColor(sf::Color::White);
 
         while (auto opt = window.pollEvent()) {
             const sf::Event& event = *opt;
