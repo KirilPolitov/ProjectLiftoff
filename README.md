@@ -22,3 +22,5 @@ Requirements:
 
 *this was written during development and is subject to change along with the project*
 *, curret latest version: v2.1.1*
+
+if you need the source code download it directly from the repository not any of the releases as its a later version there
