@@ -8,12 +8,14 @@ Features:
 -Celestial body collisions
 -Sound FX and ambient music
 -Keyboard controlled rocket
+-death
 
 Keybindings:
 -W-accelerate forward
 -S-accelerate backward
 -A/D-rotate counterclockwise/clockwise
 -Z/X-zoom in/out
+-Escape-respawn once dead
 
 Requirements:
 -All files provided in the release to be in the same folder
@@ -21,6 +23,6 @@ Requirements:
 -X86-64 CPU or an emulator for it
 
 *this was written during development and is subject to change along with the project*
-*, curret latest version: v2.1.1*
+*, curret latest version: v3.0.0*
 
 if you need the source code download it directly from the repository not any of the releases as its a newer version there
