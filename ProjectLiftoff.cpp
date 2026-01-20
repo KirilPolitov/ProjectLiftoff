@@ -10,6 +10,7 @@
 
 static std::atomic<bool> stopSound{ false };
 static std::atomic<bool> thrusterOn{ false };
+static std::atomic<bool> dead{ false };
 
 static void ambientSoundThread() {
     sf::Music ambientSound;
@@ -121,6 +122,9 @@ int main() {
 
         //collision
 		float minDistance = rectangle.getSize().length() / 5.8f + circle.getRadius();
+		if (distance < minDistance && velocity.length() > 250.f) {
+            dead.store(true);
+        }
         if (distance < minDistance) {
             sf::Vector2f overlap = normalizedDirection * (minDistance - distance);
             rectangle.move(-overlap);
@@ -128,6 +132,10 @@ int main() {
         }
 
 		float minDistanceToMoon = rectangle.getSize().length() / 3.f + moon.getRadius();
+		float moonRelativeVelocity = (velocity - velocityMoon).length();
+        if (distanceToMoon < minDistanceToMoon && moonRelativeVelocity > 250.f) {
+            dead.store(true);
+        }
         if (distanceToMoon < minDistanceToMoon) {
             sf::Vector2f overlap = normalizedDirectionToMoon * (minDistanceToMoon - distanceToMoon);
 			rectangle.move(-overlap);
@@ -139,6 +147,9 @@ int main() {
         if (distance < atmosphereDistance) {
 			float pressure = 1.f * std::exp(-(distance - minDistance) / ((atmosphereDistance - minDistance)/3));
 			float stress = pressure * velocity.length() / 2.f;
+            if (stress > 150.f) {
+				dead.store(true);
+			}
             if (stress > 100.f) {
 				rectangle.setFillColor(sf::Color::Red);
             }
@@ -166,12 +177,12 @@ int main() {
         }
 		float angleRad = rectangle.getRotation().asRadians();
 		sf::Vector2f forwardVector(std::cos(angleRad), std::sin(angleRad));
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W) && !dead.load() == true) {
 			velocity += forwardVector * thrust * deltaTime;
 			thrusterOn.store(true);
         }
 		else thrusterOn.store(false);
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) && !dead.load() == true) {
             velocity -= forwardVector * thrust * deltaTime;
 		}
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z)) {
@@ -180,13 +191,20 @@ int main() {
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X)) {
             camera.zoom(std::pow(10.f, deltaTime));
 		}
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) && dead.load() == true) {
+			dead.store(false);
+			rectangle.setPosition({ 10.f, 10.f });
+        }
 		//update position
+		if (dead.load() == true)
+            velocity = sf::Vector2f(0.f, 0.f);
 		rectangle.move(velocity * deltaTime);
 		moon.move(velocityMoon * deltaTime);
 		//rendering
         window.clear(sf::Color::Black);
         window.draw(atmosphere);
-		window.draw(rectangle);
+		if (!dead.load() == true)
+		    window.draw(rectangle);
         window.draw(moon);
 		window.draw(circle);
         window.display();
