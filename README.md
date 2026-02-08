@@ -1,5 +1,8 @@
 Project Liftoff
 
+VERY IMPORTANT:
+When opening the game open it by double clicking ProjectLiftoff.sh its the script that makes it run opening ProjectLiftoff directly wont work!
+
 2d space simulation game built using the C++ libraries of SFML
 
 Features:
@@ -22,10 +25,8 @@ Keybindings:
 
 Requirements:
 -All files provided in the release to be in the same folder
--Windows PC or Linux with WINE
--X86-64 CPU or an emulator for it
+-PC running basically any Linux distro
+-X86-64 CPU
 
 *this was written during development and is subject to change along with the project*
-*, curret latest version: v3.1.0*
-
-if you need the source code download it directly from the repository not any of the releases as its a newer version there
+*, curret latest version: v3.1.1*
