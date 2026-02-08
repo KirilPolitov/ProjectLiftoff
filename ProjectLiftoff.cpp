@@ -9,13 +9,15 @@
 #include <string>
 #include <ctime>
 #include <cstdlib>
+#ifdef _WIN32
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif
 
 static std::atomic<bool> stopSound{ false };
 static std::atomic<bool> thrusterOn{ false };
 static std::atomic<bool> dead{ false };
-static std::atomic<float> musicVolume = 50.f;
-static std::atomic<float> engineMaxVol = 100.f;
+static std::atomic<float> musicVolume{ 50.f };
+static std::atomic<float> engineMaxVol{ 100.f };
 
 static void ambientSoundThread() {
     sf::Music ambientSound;
@@ -269,24 +271,24 @@ int main() {
 			rectangle.setPosition({ 10.f, 10.f });
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::I)) {
-            if (musicVolume < 100.f)
-                musicVolume += 100.f * deltaTime;
-            if (musicVolume > 100.f) musicVolume = 100.f;
+            if (musicVolume.load() < 100.f)
+                musicVolume.store(musicVolume.load() + 100.f * deltaTime);
+            if (musicVolume.load() > 100.f) musicVolume.store(100.f);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K)) {
-            if (musicVolume > 0.f)
-                musicVolume -= 100.f * deltaTime;
-            if (musicVolume < 0.f) musicVolume = 0.f;
+            if (musicVolume.load() > 0.f)
+                musicVolume.store(musicVolume.load() - 100.f * deltaTime);
+            if (musicVolume.load() < 0.f) musicVolume.store(0.f);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::O)) {
-            if (engineMaxVol < 100.f)
-                engineMaxVol += 100.f * deltaTime;
-            if (engineMaxVol > 100.f) engineMaxVol = 100.f;
+            if (engineMaxVol.load() < 100.f)
+                engineMaxVol.store(engineMaxVol.load() + 100.f * deltaTime);
+            if (engineMaxVol.load() > 100.f) engineMaxVol.store(100.f);
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L)) {
-            if (engineMaxVol > 0.f)
-                engineMaxVol -= 100.f * deltaTime;
-            if (engineMaxVol < 0.f) engineMaxVol = 0.f;
+            if (engineMaxVol.load() > 0.f)
+                engineMaxVol.store(engineMaxVol.load() - 100.f * deltaTime);
+            if (engineMaxVol.load() < 0.f) engineMaxVol.store(0.f);
         }
 		//update position
 		if (dead.load() == true)
