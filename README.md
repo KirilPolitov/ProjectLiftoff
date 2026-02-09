@@ -29,4 +29,4 @@ Requirements:
 -X86-64 CPU
 
 *this was written during development and is subject to change along with the project*
-*, curret latest version: v3.1.1*
+*, curret latest version: v3.1.1-Linux*
