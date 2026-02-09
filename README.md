@@ -26,6 +26,4 @@ Requirements:
 -X86-64 CPU or an emulator for it
 
 *this was written during development and is subject to change along with the project*
-*, curret latest version: v3.1.0*
-
-if you need the source code download it directly from the repository not any of the releases as its a newer version there
+*, curret latest version: v3.1.1*
