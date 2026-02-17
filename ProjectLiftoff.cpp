@@ -92,9 +92,14 @@ int main() {
     deathMessage.setPosition({ (window.getSize().x / 2.f), (window.getSize().y / 2.f) });
     std::string collisionDeaths[3] = {"You hit the ground too hard!", "You are bad at falling!", "SPLAT!!!"};
     std::string aeroDeaths[3] = {"You sure like the wind!", "SLOW DOWN!", "Is it getting hot in here?"};
+    std::string cosmicRadDeath = "Cosmic radiation is enough to break the strongest wills.....";
     sf::Text deathComment(font);
     deathComment.setCharacterSize(30 * uiScale);
     deathComment.setFillColor(sf::Color::White);
+    sf::Text cosmicRadWarn(font);
+    cosmicRadWarn.setCharacterSize(30 * uiScale);
+    cosmicRadWarn.setString("WARNING\nCosmic radiation increasing exponentially\nturn back now or face\nirreversible harm or even death!");
+    cosmicRadWarn.setPosition({10, (window.getSize().y / 1.5f)});
     sf::Text respawnRemind(font);
     respawnRemind.setCharacterSize(30 * uiScale);
     respawnRemind.setFillColor(sf::Color::Cyan);
@@ -232,6 +237,16 @@ int main() {
         moonRelVel.setString("Moon Relative Velocity: " + std::to_string(static_cast<int>(floor(moonRelativeVelocity))));
         deathComment.setOrigin(deathComment.getLocalBounds().getCenter());
         deathComment.setPosition({ (window.getSize().x / 2.f), (window.getSize().y / 1.5f) });
+        if (distance > 50 * circle.getRadius()) {
+            dead.store(true);
+            deathComment.setString(cosmicRadDeath);
+        }
+        else if (distance > 35 * circle.getRadius()) {
+            cosmicRadWarn.setFillColor(sf::Color::Red);
+        }
+        else if (distance > 20 * circle.getRadius()) {
+            cosmicRadWarn.setFillColor(sf::Color::Yellow);
+        }
 
         while (auto opt = window.pollEvent()) {
             const sf::Event& event = *opt;
@@ -315,6 +330,8 @@ int main() {
             userInterface.draw(moonRelVel);
         if (distance < 1500.f || distanceToMoon < 700.f)
             userInterface.draw(collisonFatality);
+        if (distance > 20 * circle.getRadius() && dead.load() != true)
+            userInterface.draw(cosmicRadWarn);
         if (dead.load() == true) {
             userInterface.draw(deathMessage);
             userInterface.draw(deathComment);
