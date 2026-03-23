@@ -29,9 +29,12 @@ static void ambientSoundThread() {
     ambientSound.play();
 
     // Keep the thread alive
-    while (!stopSound.load() && ambientSound.getStatus() == sf::SoundSource::Status::Playing) {
+    while (ambientSound.getStatus() == sf::SoundSource::Status::Playing) {
         std::this_thread::sleep_for(std::chrono::milliseconds(30));
         ambientSound.setVolume(musicVolume);
+		if (stopSound.load()) {
+            ambientSound.stop();
+        }
     }
 }
 
@@ -44,7 +47,10 @@ static void thrusterSound() {
     engine.setVolume(100.f);
     engine.play();
     // Keep the thread alive
-    while (!stopSound.load() && engine.getStatus() == sf::SoundSource::Status::Playing) {
+    while (engine.getStatus() == sf::SoundSource::Status::Playing) {
+		if (stopSound.load()) {
+            engine.stop();
+        }
         if (!thrusterOn.load()) {
             engine.setVolume(0.f);
         }
@@ -58,7 +64,7 @@ int main() {
     srand(time(0));
     // Use the desktop resolution so the video mode matches the screen size
     sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
-    sf::RenderWindow window(videoMode, "Project Lifoff");
+    sf::RenderWindow window(videoMode, "Project Liftoff");
 	window.setFramerateLimit(165);
     window.setVerticalSyncEnabled(true);
 	sf::Image icon;
@@ -162,8 +168,8 @@ int main() {
 	sf::Vector2f initialMoonDirection = sf::Vector2f(1.f, 0.f);
 	velocityMoon = initialMoonDirection.normalized() * 100.f;
 
-	std::thread soundThread(ambientSoundThread);
-	std::thread engineThread(thrusterSound);
+	std::jthread soundThread(ambientSoundThread);
+	std::jthread engineThread(thrusterSound);
 
     while (window.isOpen()) {
         float deltaTime = clock.restart().asSeconds();
@@ -253,8 +259,6 @@ int main() {
             if (event.is<sf::Event::Closed>()) {
 				stopSound.store(true);
 				std::this_thread::sleep_for(std::chrono::milliseconds(30));
-				soundThread.join();
-				engineThread.join();
                 window.close();
             }
         }
