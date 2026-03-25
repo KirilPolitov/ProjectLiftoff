@@ -15,6 +15,7 @@
 
 static std::atomic<bool> stopSound{ false };
 static std::atomic<bool> thrusterOn{ false };
+static std::atomic<bool> rcsOn{ false };
 static std::atomic<bool> dead{ false };
 static std::atomic<float> musicVolume{ 50.f };
 static std::atomic<float> engineMaxVol{ 100.f };
@@ -59,6 +60,26 @@ static void thrusterSound() {
     }
 }
 
+static void rcsSound() {
+    sf::Music rcs;
+    if (!rcs.openFromFile("RCS.ogg")) {
+        return;
+    }
+    rcs.setLooping(true);
+    rcs.setVolume(100.f);
+    rcs.play();
+    // Keep the thread alive
+    while (rcs.getStatus() == sf::SoundSource::Status::Playing) {
+        if (stopSound.load()) {
+            rcs.stop();
+        }
+        if (!rcsOn.load()) {
+            rcs.setVolume(0.f);
+        }
+        else rcs.setVolume(engineMaxVol*0.7f);
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+    }
+}
 
 int main() {
     srand(time(0));
@@ -159,6 +180,7 @@ int main() {
     float gravity = 50000000.f;
 	float moonGravity = 10000000.f;
     float thrust = 200.f;
+    float rcsThrust = 50.f;
     float rotationSpeed = 3000.f;
     sf::View camera(window.getDefaultView());
     sf::View cameraUI;
@@ -170,6 +192,7 @@ int main() {
 
 	std::jthread soundThread(ambientSoundThread);
 	std::jthread engineThread(thrusterSound);
+	std::jthread rcsThread(rcsSound);
 
     while (window.isOpen()) {
         float deltaTime = clock.restart().asSeconds();
@@ -277,8 +300,11 @@ int main() {
         }
 		else thrusterOn.store(false);
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) && !dead.load() == true) {
-            velocity -= forwardVector * thrust * deltaTime;
+            velocity -= forwardVector * rcsThrust * deltaTime;
 		}
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+			rcsOn.store(true);
+		else rcsOn.store(false);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z)) {
             camera.zoom(std::pow(0.1f, deltaTime));
         }
